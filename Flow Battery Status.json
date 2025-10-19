@@ -12,7 +12,7 @@
         "type": "mqtt in",
         "z": "1ea66e6d203988a2",
         "name": "Vultr2 sensors raw battery",
-        "topic": "KTBMES/+/sensors/raw/+/battery_ok",
+        "topic": "pi1/sensors/raw/+/battery_ok",
         "qos": "2",
         "datatype": "auto-detect",
         "broker": "40227b344b006862",
@@ -24,7 +24,8 @@
         "y": 460,
         "wires": [
             [
-                "8dcf8b552ace98fd"
+                "8dcf8b552ace98fd",
+                "1e7b5cc3b2c75eae"
             ]
         ]
     },
@@ -33,7 +34,7 @@
         "type": "function",
         "z": "1ea66e6d203988a2",
         "name": "Parse Out Device ID",
-        "func": "// Extract device ID from topic (5th element in path)\nconst topicParts = msg.topic.split('/');\nconst deviceId = topicParts[4]; // Index 4 for 5th element\n\nconst battery_ok = msg.payload\nlet note = \"No issues\"\n\n// Optional error checking\nif (typeof deviceId === 'undefined') {\n    note = \"Invalid topic format\";\n    node.error(note, msg);\n}\n\nif (typeof msg.payload !== 'number') {\n    note = \"Invalid payload type\";\n    node.error(note, msg);\n\n}\n\n// Create new payload object\nconst newPayload = {\n    time: new Date().toISOString(),\n    device_id: deviceId,\n    battery_ok: battery_ok,\n    note: note\n};\n\n// Create new message with clean payload\nconst newMsg = {\n    payload: newPayload,\n    // Optional: Carry through original properties\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\n\nreturn newMsg;\n",
+        "func": "// Extract device ID from topic (next to last element in path)\nconst topicParts = msg.topic.split('/');\nconst deviceId = topicParts[topicParts.length - 2]; // Next to last element\n\nconst battery_ok = msg.payload\nlet note = \"No issues\"\n\n// Optional error checking\nif (typeof deviceId === 'undefined') {\n    note = \"Invalid topic format\";\n    node.error(note, msg);\n}\n\nif (typeof msg.payload !== 'number') {\n    note = \"Invalid payload type\";\n    node.error(note, msg);\n\n}\n\n// Create new payload object\nconst newPayload = {\n    time: new Date().toISOString(),\n    device_id: deviceId,\n    battery_ok: battery_ok,\n    note: note\n};\n\n// Create new message with clean payload\nconst newMsg = {\n    payload: newPayload,\n    // Optional: Carry through original properties\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\n\nreturn newMsg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -71,7 +72,7 @@
         "type": "function",
         "z": "1ea66e6d203988a2",
         "name": "device_id to device_name",
-        "func": "// Device Name Lookup Function Node\nconst deviceLookup = {\n    \"37\": \"Living_Room\",\n    \"167\": \"Patio\",\n    \"164\": \"Porch\",\n    \"79\": \"Shrine_Room\"\n    // Add more mappings as needed\n};\n\n// Get device ID from incoming message\nconst deviceId = msg.payload.device_id;\nconst time = msg.payload.time;\nconst battery_ok = msg.payload.battery_ok;\n\n// Determine device name\nconst deviceName = deviceLookup[deviceId] || `UNKNOWN_${deviceId}`;\n\n// Create new payload\nconst newPayload = {\n    device_id: deviceId,\n    device_name: deviceName,\n    time: time,\n    battery_ok: battery_ok\n};\n\n// Optional: Add diagnostic info\nnewPayload.lookup_status = deviceLookup[deviceId] \n    ? \"Matched\" \n    : \"Fallback\";\n\n// Return enhanced message\nreturn {\n    payload: newPayload,\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\nreturn msg;",
+        "func": "// Device Name Lookup Function Node\nconst deviceLookup = {\n    \"37\": \"Living_Room\",\n    \"172\": \"Patio\",\n    \"164\": \"Porch\",\n    \"79\": \"Shrine_Room\"\n    // Add more mappings as needed\n};\n\n// Get device ID from incoming message\nconst deviceId = msg.payload.device_id;\nconst time = msg.payload.time;\nconst battery_ok = msg.payload.battery_ok;\n\n// Determine device name\nconst deviceName = deviceLookup[deviceId] || `UNKNOWN_${deviceId}`;\n\n// Create new payload\nconst newPayload = {\n    device_id: deviceId,\n    device_name: deviceName,\n    time: time,\n    battery_ok: battery_ok\n};\n\n// Optional: Add diagnostic info\nnewPayload.lookup_status = deviceLookup[deviceId] \n    ? \"Matched\" \n    : \"Fallback\";\n\n// Return enhanced message\nreturn {\n    payload: newPayload,\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -93,7 +94,7 @@
         "type": "debug",
         "z": "1ea66e6d203988a2",
         "name": "Mapped Device_Name",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -247,7 +248,7 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 1400,
+        "x": 1560,
         "y": 640,
         "wires": []
     },
@@ -268,8 +269,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 1390,
-        "y": 560,
+        "x": 1550,
+        "y": 600,
         "wires": []
     },
     {
@@ -289,8 +290,8 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 1630,
-        "y": 600,
+        "x": 1530,
+        "y": 560,
         "wires": []
     },
     {
@@ -310,7 +311,7 @@
         "font": "",
         "fontSize": 16,
         "color": "#000000",
-        "x": 1370,
+        "x": 1530,
         "y": 680,
         "wires": []
     },
@@ -346,7 +347,7 @@
         "shape": "circle",
         "showGlow": true,
         "name": "Living Room LED",
-        "x": 1410,
+        "x": 1570,
         "y": 760,
         "wires": []
     },
@@ -382,7 +383,7 @@
         "shape": "circle",
         "showGlow": true,
         "name": "Patio Battery",
-        "x": 1390,
+        "x": 1550,
         "y": 800,
         "wires": []
     },
@@ -418,7 +419,7 @@
         "shape": "circle",
         "showGlow": true,
         "name": "Shrine Room Battery",
-        "x": 1420,
+        "x": 1580,
         "y": 840,
         "wires": []
     },
@@ -454,7 +455,7 @@
         "shape": "circle",
         "showGlow": true,
         "name": "Porch Battery",
-        "x": 1400,
+        "x": 1560,
         "y": 880,
         "wires": []
     },
@@ -494,11 +495,11 @@
         ]
     },
     {
-        "id": "96de5ff5234bcd4e",
+        "id": "1e7b5cc3b2c75eae",
         "type": "debug",
         "z": "1ea66e6d203988a2",
-        "name": "Patio 2 debug",
-        "active": true,
+        "name": "debug 4",
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -506,8 +507,8 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1400,
-        "y": 600,
+        "x": 440,
+        "y": 220,
         "wires": []
     },
     {

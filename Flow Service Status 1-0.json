@@ -1,0 +1,777 @@
+[
+    {
+        "id": "96e0d844962af7b8",
+        "type": "tab",
+        "label": "Service Status 1.0",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "inject1",
+        "type": "inject",
+        "z": "96e0d844962af7b8",
+        "name": "Periodic Trigger",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 140,
+        "y": 220,
+        "wires": [
+            [
+                "http1",
+                "4e7ab2048c014149",
+                "e78708cee091612d",
+                "2a938a8ac237f7ff",
+                "8c459e4ed8992348"
+            ]
+        ]
+    },
+    {
+        "id": "http1",
+        "type": "http request",
+        "z": "96e0d844962af7b8",
+        "name": "Check KTBCS Website HTTP",
+        "method": "GET",
+        "paytoqs": "ignore",
+        "url": "http://ktbcs.xyz",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 400,
+        "y": 220,
+        "wires": [
+            [
+                "function1"
+            ]
+        ]
+    },
+    {
+        "id": "function1",
+        "type": "function",
+        "z": "96e0d844962af7b8",
+        "name": "Check HTTP Response KTBCS",
+        "func": "const expected_string = \"<title>KTBCS - Professional Technology Consulting</title>\";\nmsg.payload = msg.payload.includes(expected_string);\n\nlet d = new Date();\nlet yyyy = d.getFullYear();\nlet mm = String(d.getMonth() + 1).padStart(2, '0');\nlet dd = String(d.getDate()).padStart(2, '0');\nlet hh = String(d.getHours()).padStart(2, '0');\nlet min = String(d.getMinutes()).padStart(2, '0');\nmsg.last_updated = `${yyyy}-${mm}-${dd} ${hh}:${min}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 220,
+        "wires": [
+            [
+                "ui-led1",
+                "5cd6d3a4a5d0908d",
+                "bb92c5b9e7eb4b7f"
+            ]
+        ]
+    },
+    {
+        "id": "ui-led1",
+        "type": "ui_led",
+        "z": "96e0d844962af7b8",
+        "order": 1,
+        "group": "5eb1e0ea44caa899",
+        "width": "",
+        "height": "",
+        "label": "KTBCS HTTP Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBCS HTTP Status",
+        "x": 1020,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "37d6c26ae6c0de6e",
+        "type": "debug",
+        "z": "96e0d844962af7b8",
+        "name": "debug synology",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "4e7ab2048c014149",
+        "type": "http request",
+        "z": "96e0d844962af7b8",
+        "name": "Check NAS Website",
+        "method": "GET",
+        "paytoqs": "ignore",
+        "url": "http://100.114.180.102:5000/#/signin",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 380,
+        "y": 960,
+        "wires": [
+            [
+                "ecc50539f123c581"
+            ]
+        ]
+    },
+    {
+        "id": "ecc50539f123c581",
+        "type": "function",
+        "z": "96e0d844962af7b8",
+        "name": "Check Response NAS",
+        "func": "const expected_string = 'content=\"KTBMES-NAS-01';\nmsg.payload = msg.payload.includes(expected_string);\n\nlet d = new Date();\nlet yyyy = d.getFullYear();\nlet mm = String(d.getMonth() + 1).padStart(2, '0');\nlet dd = String(d.getDate()).padStart(2, '0');\nlet hh = String(d.getHours()).padStart(2, '0');\nlet min = String(d.getMinutes()).padStart(2, '0');\nmsg.last_updated = `${yyyy}-${mm}-${dd} ${hh}:${min}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 960,
+        "wires": [
+            [
+                "37d6c26ae6c0de6e",
+                "e022825811d62202",
+                "03757d52ae3bfce8"
+            ]
+        ]
+    },
+    {
+        "id": "e022825811d62202",
+        "type": "ui_led",
+        "z": "96e0d844962af7b8",
+        "order": 7,
+        "group": "5eb1e0ea44caa899",
+        "width": "",
+        "height": "",
+        "label": "KTBMES-NAS-01 Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBMES-NAS-01 Status",
+        "x": 1030,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "5cd6d3a4a5d0908d",
+        "type": "debug",
+        "z": "96e0d844962af7b8",
+        "name": "debug HTTP KTBCS",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "bb92c5b9e7eb4b7f",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "5eb1e0ea44caa899",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Last Updated HTTP KTBCS",
+        "label": "Updated:",
+        "format": "{{msg.last_updated}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1040,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "03757d52ae3bfce8",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "5eb1e0ea44caa899",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "name": "Last Updated NAS",
+        "label": "Updated:",
+        "format": "{{msg.last_updated}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1010,
+        "y": 1000,
+        "wires": []
+    },
+    {
+        "id": "e78708cee091612d",
+        "type": "http request",
+        "z": "96e0d844962af7b8",
+        "name": "Check KTBCS Website HTTPS",
+        "method": "GET",
+        "paytoqs": "ignore",
+        "url": "http://ktbcs.xyz",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 410,
+        "y": 360,
+        "wires": [
+            [
+                "3aab5ec4ec17988d"
+            ]
+        ]
+    },
+    {
+        "id": "3aab5ec4ec17988d",
+        "type": "function",
+        "z": "96e0d844962af7b8",
+        "name": "Check HTTPS Response KTBCS",
+        "func": "const expected_string = \"<title>KTBCS - Professional Technology Consulting</title>\";\nmsg.payload = msg.payload.includes(expected_string);\n\nlet d = new Date();\nlet yyyy = d.getFullYear();\nlet mm = String(d.getMonth() + 1).padStart(2, '0');\nlet dd = String(d.getDate()).padStart(2, '0');\nlet hh = String(d.getHours()).padStart(2, '0');\nlet min = String(d.getMinutes()).padStart(2, '0');\nmsg.last_updated = `${yyyy}-${mm}-${dd} ${hh}:${min}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 360,
+        "wires": [
+            [
+                "70bc1c28c4156e1a",
+                "44a4c6ed71113515",
+                "1b7945d5303fe330"
+            ]
+        ]
+    },
+    {
+        "id": "70bc1c28c4156e1a",
+        "type": "ui_led",
+        "z": "96e0d844962af7b8",
+        "order": 1,
+        "group": "a7dac7d7234219c6",
+        "width": "",
+        "height": "",
+        "label": "KTBCS HTTPS Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBCS HTTPS Status",
+        "x": 1020,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "44a4c6ed71113515",
+        "type": "debug",
+        "z": "96e0d844962af7b8",
+        "name": "debug HTTPS KTBCS",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "1b7945d5303fe330",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "a7dac7d7234219c6",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Last Updated HTTPS KTBCS",
+        "label": "Updated:",
+        "format": "{{msg.last_updated}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1040,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "c69c9120b820d0c4",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "f5c9154159481611",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "name": "NAS Site",
+        "label": "NAS",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 980,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "2a938a8ac237f7ff",
+        "type": "http request",
+        "z": "96e0d844962af7b8",
+        "name": "Check SkinnerEditorial HTTP",
+        "method": "GET",
+        "paytoqs": "ignore",
+        "url": "http://skinnereditorial.com",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 400,
+        "y": 560,
+        "wires": [
+            [
+                "c82ecedcc721066b"
+            ]
+        ]
+    },
+    {
+        "id": "c82ecedcc721066b",
+        "type": "function",
+        "z": "96e0d844962af7b8",
+        "name": "Check HTTP Response SKINNER",
+        "func": "const expected_string = \"<title>Skinner Editorial Portfolio</title>\";\nmsg.payload = msg.payload.includes(expected_string);\n\nlet d = new Date();\nlet yyyy = d.getFullYear();\nlet mm = String(d.getMonth() + 1).padStart(2, '0');\nlet dd = String(d.getDate()).padStart(2, '0');\nlet hh = String(d.getHours()).padStart(2, '0');\nlet min = String(d.getMinutes()).padStart(2, '0');\nmsg.last_updated = `${yyyy}-${mm}-${dd} ${hh}:${min}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 560,
+        "wires": [
+            [
+                "b5f98061246c5fb2",
+                "a64b573c4e1363af",
+                "c7638652898febae"
+            ]
+        ]
+    },
+    {
+        "id": "b5f98061246c5fb2",
+        "type": "ui_led",
+        "z": "96e0d844962af7b8",
+        "order": 4,
+        "group": "5eb1e0ea44caa899",
+        "width": "",
+        "height": "",
+        "label": "SKINNER HTTP Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "SKINNER HTTP Status",
+        "x": 1030,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "a64b573c4e1363af",
+        "type": "debug",
+        "z": "96e0d844962af7b8",
+        "name": "debug HTTP SKINNER",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "c7638652898febae",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "5eb1e0ea44caa899",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "Last Updated HTTP SKINNER",
+        "label": "Updated:",
+        "format": "{{msg.last_updated}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1050,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "8c459e4ed8992348",
+        "type": "http request",
+        "z": "96e0d844962af7b8",
+        "name": "Check SkinnerEditorial HTTPS",
+        "method": "GET",
+        "paytoqs": "ignore",
+        "url": "https://skinnereditorial.com",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 410,
+        "y": 700,
+        "wires": [
+            [
+                "4c07e8d590b6c506"
+            ]
+        ]
+    },
+    {
+        "id": "4c07e8d590b6c506",
+        "type": "function",
+        "z": "96e0d844962af7b8",
+        "name": "Check HTTPS Response SKINNER",
+        "func": "const expected_string = \"<title>Skinner Editorial Portfolio</title>\";\nmsg.payload = msg.payload.includes(expected_string);\n\nlet d = new Date();\nlet yyyy = d.getFullYear();\nlet mm = String(d.getMonth() + 1).padStart(2, '0');\nlet dd = String(d.getDate()).padStart(2, '0');\nlet hh = String(d.getHours()).padStart(2, '0');\nlet min = String(d.getMinutes()).padStart(2, '0');\nmsg.last_updated = `${yyyy}-${mm}-${dd} ${hh}:${min}`;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 700,
+        "wires": [
+            [
+                "352a68a84e8e4b79",
+                "02c925c8219cedf1",
+                "eabaec9c08ea200d"
+            ]
+        ]
+    },
+    {
+        "id": "352a68a84e8e4b79",
+        "type": "ui_led",
+        "z": "96e0d844962af7b8",
+        "order": 4,
+        "group": "a7dac7d7234219c6",
+        "width": "",
+        "height": "",
+        "label": "SKINNER HTTPS Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "SKINNER HTTPS Status",
+        "x": 1030,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "02c925c8219cedf1",
+        "type": "debug",
+        "z": "96e0d844962af7b8",
+        "name": "debug HTTPS SKINNER",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "eabaec9c08ea200d",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "a7dac7d7234219c6",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "Last Updated HTTPS SKINNER",
+        "label": "Updated:",
+        "format": "{{msg.last_updated}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1050,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "a3e54ee9a7c3bd94",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "f5c9154159481611",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "Skinner Site",
+        "label": "SKINNER EDITORIAL",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 990,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "ccc08f98a1c8cca4",
+        "type": "ui_text",
+        "z": "96e0d844962af7b8",
+        "group": "f5c9154159481611",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "KTBCS Site",
+        "label": "KTBCS",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 990,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "6b8cc6918a21c1f1",
+        "type": "ui_spacer",
+        "z": "96e0d844962af7b8",
+        "name": "spacer",
+        "group": "f5c9154159481611",
+        "order": 5,
+        "width": "6",
+        "height": "3"
+    },
+    {
+        "id": "1bb6585b7c6f4671",
+        "type": "ui_spacer",
+        "z": "96e0d844962af7b8",
+        "name": "spacer",
+        "group": "5eb1e0ea44caa899",
+        "order": 3,
+        "width": "6",
+        "height": "2"
+    },
+    {
+        "id": "cd20e0c6cc5f598b",
+        "type": "ui_spacer",
+        "z": "96e0d844962af7b8",
+        "name": "spacer",
+        "group": "5eb1e0ea44caa899",
+        "order": 6,
+        "width": "6",
+        "height": "2"
+    },
+    {
+        "id": "432c13b74da22006",
+        "type": "ui_spacer",
+        "z": "96e0d844962af7b8",
+        "name": "spacer",
+        "group": "a7dac7d7234219c6",
+        "order": 3,
+        "width": "6",
+        "height": "2"
+    },
+    {
+        "id": "b3e2a462dbb74c11",
+        "type": "ui_spacer",
+        "z": "96e0d844962af7b8",
+        "name": "spacer",
+        "group": "f5c9154159481611",
+        "order": 3,
+        "width": "6",
+        "height": "3"
+    },
+    {
+        "id": "2dba6006a2cfe138",
+        "type": "ui_spacer",
+        "z": "96e0d844962af7b8",
+        "name": "spacer",
+        "group": "a7dac7d7234219c6",
+        "order": 6,
+        "width": "6",
+        "height": "2"
+    },
+    {
+        "id": "4d7d1719cf82be59",
+        "type": "ui_spacer",
+        "z": "96e0d844962af7b8",
+        "name": "spacer",
+        "group": "f5c9154159481611",
+        "order": 7,
+        "width": "6",
+        "height": "1"
+    },
+    {
+        "id": "5eb1e0ea44caa899",
+        "type": "ui_group",
+        "name": "HTTP Status",
+        "tab": "2eded491a2c9866d",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a7dac7d7234219c6",
+        "type": "ui_group",
+        "name": "HTTPS Status",
+        "tab": "2eded491a2c9866d",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "f5c9154159481611",
+        "type": "ui_group",
+        "name": "Site",
+        "tab": "2eded491a2c9866d",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2eded491a2c9866d",
+        "type": "ui_tab",
+        "name": "Server Status 1.0",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]

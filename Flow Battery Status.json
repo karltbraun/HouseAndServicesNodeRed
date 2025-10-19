@@ -1,0 +1,575 @@
+[
+    {
+        "id": "1ea66e6d203988a2",
+        "type": "tab",
+        "label": "Flow Battery Status",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a9509883a9be0ae9",
+        "type": "mqtt in",
+        "z": "1ea66e6d203988a2",
+        "name": "Vultr2 sensors raw battery",
+        "topic": "KTBMES/+/sensors/raw/+/battery_ok",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "40227b344b006862",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 230,
+        "y": 460,
+        "wires": [
+            [
+                "8dcf8b552ace98fd"
+            ]
+        ]
+    },
+    {
+        "id": "8dcf8b552ace98fd",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "Parse Out Device ID",
+        "func": "// Extract device ID from topic (5th element in path)\nconst topicParts = msg.topic.split('/');\nconst deviceId = topicParts[4]; // Index 4 for 5th element\n\nconst battery_ok = msg.payload\nlet note = \"No issues\"\n\n// Optional error checking\nif (typeof deviceId === 'undefined') {\n    note = \"Invalid topic format\";\n    node.error(note, msg);\n}\n\nif (typeof msg.payload !== 'number') {\n    note = \"Invalid payload type\";\n    node.error(note, msg);\n\n}\n\n// Create new payload object\nconst newPayload = {\n    time: new Date().toISOString(),\n    device_id: deviceId,\n    battery_ok: battery_ok,\n    note: note\n};\n\n// Create new message with clean payload\nconst newMsg = {\n    payload: newPayload,\n    // Optional: Carry through original properties\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\n\nreturn newMsg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 320,
+        "wires": [
+            [
+                "b196f56b42852b2c",
+                "db94772040f670f2"
+            ]
+        ]
+    },
+    {
+        "id": "b196f56b42852b2c",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Parsed Device_ID",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "db94772040f670f2",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "device_id to device_name",
+        "func": "// Device Name Lookup Function Node\nconst deviceLookup = {\n    \"37\": \"Living_Room\",\n    \"167\": \"Patio\",\n    \"164\": \"Porch\",\n    \"79\": \"Shrine_Room\"\n    // Add more mappings as needed\n};\n\n// Get device ID from incoming message\nconst deviceId = msg.payload.device_id;\nconst time = msg.payload.time;\nconst battery_ok = msg.payload.battery_ok;\n\n// Determine device name\nconst deviceName = deviceLookup[deviceId] || `UNKNOWN_${deviceId}`;\n\n// Create new payload\nconst newPayload = {\n    device_id: deviceId,\n    device_name: deviceName,\n    time: time,\n    battery_ok: battery_ok\n};\n\n// Optional: Add diagnostic info\nnewPayload.lookup_status = deviceLookup[deviceId] \n    ? \"Matched\" \n    : \"Fallback\";\n\n// Return enhanced message\nreturn {\n    payload: newPayload,\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 400,
+        "wires": [
+            [
+                "d162b4fcb226e297",
+                "8f60cd5358ee5d7b",
+                "d1060e957ff1f754"
+            ]
+        ]
+    },
+    {
+        "id": "d162b4fcb226e297",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Mapped Device_Name",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "8f60cd5358ee5d7b",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "Parse_into_devices",
+        "func": "let deviceName = msg.payload.device_name;\nlet batteryOk = msg.payload.battery_ok;\nlet status = null;\n\nif (batteryOk === 1) {\n    status = true;\n} else if (batteryOk === 0) {\n    status = false;\n} else {\n    status = null;\n}\n\nlet newMsg = {\n    \"payload\": status\n};\n\nswitch (deviceName) {\n    case \"Living_Room\":\n        return [newMsg, null, null, null, null];\n    case \"Patio\":\n        return [null, newMsg, null, null, null];\n    case \"Shrine_Room\":\n        return [null, null, newMsg, null, null];\n    case \"Porch\":\n        return [null, null, null, newMsg, null];\n    default:\n        return [null, null, null, null, newMsg];\n}\nreturn null;\n\n",
+        "outputs": 5,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1110,
+        "y": 400,
+        "wires": [
+            [
+                "529e8634a00f2cab",
+                "2c375891ebcd946e",
+                "1a092f55f5d5d207"
+            ],
+            [
+                "ca4c6e04643a2dd4",
+                "739324b6124805f4",
+                "2f8fbf8788d25d88"
+            ],
+            [
+                "2a7071bd382a4648",
+                "042b34f21dde3f9d",
+                "6438502db157812f"
+            ],
+            [
+                "2c013d7ae1fcceba",
+                "9d6f3ec2012281c8",
+                "3de688fdf1df5cae"
+            ],
+            [
+                "a7d2a18eef244c92"
+            ]
+        ]
+    },
+    {
+        "id": "529e8634a00f2cab",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Living_Room",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1390,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "ca4c6e04643a2dd4",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Patio",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1370,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2a7071bd382a4648",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Shrine_Room",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1400,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "2c013d7ae1fcceba",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Porch",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1370,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "a7d2a18eef244c92",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Unknown",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1380,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "042b34f21dde3f9d",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "a423bc63783b8656",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Shrine_Room",
+        "label": "Shrine Room Battery",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1400,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "2c375891ebcd946e",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "a423bc63783b8656",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Living_Room",
+        "label": "Living Room Battery",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1390,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "2f8fbf8788d25d88",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "a423bc63783b8656",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Patio",
+        "label": "Patio Battery",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1630,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "9d6f3ec2012281c8",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "a423bc63783b8656",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Porch",
+        "label": "Porch Battery",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1370,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "1a092f55f5d5d207",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 2,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Living Room Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Living Room LED",
+        "x": 1410,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "739324b6124805f4",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 3,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Patio Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Patio Battery",
+        "x": 1390,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "6438502db157812f",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 1,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Shrine Room Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Shrine Room Battery",
+        "x": 1420,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "3de688fdf1df5cae",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 4,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Porch Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Porch Battery",
+        "x": 1400,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "1bb68fec61e2e3a9",
+        "type": "e-mail",
+        "z": "1ea66e6d203988a2",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "authtype": "BASIC",
+        "saslformat": true,
+        "token": "oauth2Response.access_token",
+        "secure": true,
+        "tls": true,
+        "name": "karltbraun@gmail.com",
+        "dname": "Email on bad battery",
+        "x": 980,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "d1060e957ff1f754",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "Alert on bad battery",
+        "func": "if (msg.payload.battery_ok != 1) {\n    let subject = \"Battery Status Not OK\";\n    let line1 = \"Device: \" + msg.payload.device_name + \"\\n\";\n    let line2 = \"Battery Status: \" + msg.payload.battery_ok + \"\\n\";\n\n    let newMsg = {\n        \"topic\": subject,\n        \"payload\": line1 + line2\n    }\n    return newMsg;\n} else {\n    return null;\n}\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 880,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "96de5ff5234bcd4e",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Patio 2 debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1400,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "40227b344b006862",
+        "type": "mqtt-broker",
+        "name": "n-vutlr2",
+        "broker": "n-vultr2",
+        "port": "1883",
+        "clientid": "ktbcs_mbp_node-red",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "a423bc63783b8656",
+        "type": "ui_group",
+        "name": "House Sensors Simple",
+        "tab": "c887baf6bfcb3bee",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "f704b1b3e654081a",
+        "type": "ui_group",
+        "name": "House Sensors LED",
+        "tab": "c887baf6bfcb3bee",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c887baf6bfcb3bee",
+        "type": "ui_tab",
+        "name": "Battery Status",
+        "icon": "dashboard",
+        "order": 4,
+        "disabled": false,
+        "hidden": false
+    }
+]

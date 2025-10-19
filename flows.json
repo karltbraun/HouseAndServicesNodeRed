@@ -1,0 +1,284 @@
+[
+    {
+        "id": "e601f036f3bdbe88",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b2210d1f3bb037a7",
+        "type": "mqtt-broker",
+        "name": "Vultr1",
+        "broker": "vultr1",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "74d09cf3ab883db2",
+        "type": "ui_tab",
+        "name": "Temp Sensor Dashboard",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "2d7e8ca8ae55308e",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "bc0fd227ec8b2899",
+        "type": "ui_group",
+        "name": "Temp Guages",
+        "tab": "74d09cf3ab883db2",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "8d1c4121d6b11280",
+        "type": "mqtt in",
+        "z": "e601f036f3bdbe88",
+        "name": "OFC-A Temp_C",
+        "topic": "KTBMES/sensors/raw/79/temperature_C",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "b2210d1f3bb037a7",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 180,
+        "wires": [
+            [
+                "0fe21324f6e2d30d"
+            ]
+        ]
+    },
+    {
+        "id": "a722e12c7c27e98f",
+        "type": "debug",
+        "z": "e601f036f3bdbe88",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "0fe21324f6e2d30d",
+        "type": "function",
+        "z": "e601f036f3bdbe88",
+        "name": "C_to_F",
+        "func": "// Convert Celsius to Fahrenheit\nlet tC = parseFloat(msg.payload);\nlet tF = (tC * 9 / 5) + 32;\n\n// Round to 2 decimal places\ntF = Math.round(tF * 100) / 100;\n\n// Set the new payload\nmsg.payload = tF;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 180,
+        "wires": [
+            [
+                "a722e12c7c27e98f",
+                "a29d51454b05618b",
+                "4ab734c11a5ddc11"
+            ]
+        ]
+    },
+    {
+        "id": "a29d51454b05618b",
+        "type": "ui_gauge",
+        "z": "e601f036f3bdbe88",
+        "name": "OFC-A Guage",
+        "group": "bc0fd227ec8b2899",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "79 - OFC-A",
+        "label": "F",
+        "format": "{{value}}",
+        "min": "10",
+        "max": "110",
+        "colors": [
+            "#6196db",
+            "#f9d10b",
+            "#ca3838"
+        ],
+        "seg1": "70",
+        "seg2": "70",
+        "x": 580,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "4ab734c11a5ddc11",
+        "type": "ui_chart",
+        "z": "e601f036f3bdbe88",
+        "name": "OFC-A Chart",
+        "group": "bc0fd227ec8b2899",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "OFC-A",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "Waiting for data",
+        "dot": false,
+        "ymin": "20",
+        "ymax": "110",
+        "removeOlder": "12",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "x": 570,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    }
+]

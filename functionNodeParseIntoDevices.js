@@ -5,8 +5,8 @@ if (!msg.payload || typeof msg.payload.device_name === 'undefined') {
 }
 
 let deviceName = msg.payload.device_name;
-let batteryOk = msg.payload.battery_ok;
 let timestamp = msg.timestamp
+let batteryOk = msg.payload.battery_ok === 1 ? true : msg.payload.battery_ok === 0 ? false : null;
 
 // output payload should be boolean
 // other message attributes defined for email output

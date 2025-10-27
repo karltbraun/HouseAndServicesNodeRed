@@ -1,0 +1,888 @@
+[
+    {
+        "id": "2afd6555804d5217",
+        "type": "subflow",
+        "name": "Check Status Subflow",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 60,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "63429d191d736ad9"
+                    },
+                    {
+                        "id": "7192510f6c35a3ac"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 880,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "4981824ce4ddc562",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "29f66b32ed9cf90a",
+        "type": "http request",
+        "z": "2afd6555804d5217",
+        "name": "",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 470,
+        "y": 80,
+        "wires": [
+            [
+                "4981824ce4ddc562"
+            ]
+        ]
+    },
+    {
+        "id": "4981824ce4ddc562",
+        "type": "function",
+        "z": "2afd6555804d5217",
+        "name": "Check HTTP Request",
+        "func": "// input: \n//   msg.payload - the output of the HTTP request node\n//   msg.persist - preserved values from setup node\n//     msg.persist.method - original HTTP method\n//     msg.persist.url - original URL\n//     msg.persist.expected_string - string to look for in payload\n\n// newMsg.persist = {\n//    method: method,\n//    url: url,\n//    originalPayload: null,\n//    expected_string: expected_string\n//};\n//\n\nconst expected_string = msg.persist.expected_string;\nconst returned_string = String(msg.payload || \"\");\n\nmsg.persist.match = returned_string.includes(expected_string);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "63429d191d736ad9",
+        "type": "function",
+        "z": "2afd6555804d5217",
+        "name": "Setup HTTP Request",
+        "func": "// Finish setting up the HTTP request\n\nconst newMsg = {};\n\n// HTTP Request node expects these parameters\n\nnewMsg.method = msg.method;\nnewMsg.url = msg.url;\nnewMsg.payload = null;\n\n// Store original values in a custom object (will persist)\n// as HTTP request will clear out payload top level\n\nnewMsg.persist = {\n    tag: msg.tag,\n    method: msg.method,\n    url: msg.url,\n    expected_string: msg.expected_string,\n    match: false,\n    timestamp: msg.timestamp,\n    timestampS: new Date(msg.timestamp).toISOString()\n};\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 80,
+        "wires": [
+            [
+                "29f66b32ed9cf90a",
+                "b96a445283c77661"
+            ]
+        ]
+    },
+    {
+        "id": "7192510f6c35a3ac",
+        "type": "debug",
+        "z": "2afd6555804d5217",
+        "name": "Input to Check Status Subflow",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 250,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "b96a445283c77661",
+        "type": "debug",
+        "z": "2afd6555804d5217",
+        "name": "Input to http request node",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "840eee6fa338866e",
+        "type": "tab",
+        "label": "Flow Service Status 2.0",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f0c8a2686f075ce6",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 1,
+        "group": "6b5c250edfe9724d",
+        "width": "",
+        "height": "",
+        "label": "KTBCS HTTP Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBCS HTTP Status",
+        "x": 1320,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "4c23496360e22a9c",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug synology",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1300,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "b3884213132ceead",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 7,
+        "group": "0cbeca01ac5e0c11",
+        "width": "",
+        "height": "",
+        "label": "KTBMES-NAS-01 Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBMES-NAS-01 Status",
+        "x": 1330,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "25fc7c5e113349a4",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug HTTP KTBCS",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1320,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "c069c7f6c192017f",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 1,
+        "group": "6b5c250edfe9724d",
+        "width": "",
+        "height": "",
+        "label": "KTBCS HTTPS Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBCS HTTPS Status",
+        "x": 1320,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "05745da8822e9549",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug HTTPS KTBCS",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1320,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c35503e3d7e86ee7",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 4,
+        "group": "1ddea1dfc6a0ebed",
+        "width": "",
+        "height": "",
+        "label": "SKINNER HTTP Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "SKINNER HTTP Status",
+        "x": 1330,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "46af3cda2d44c61d",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug HTTP SKINNER",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1320,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "2aa787343927f1b9",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 4,
+        "group": "1ddea1dfc6a0ebed",
+        "width": "",
+        "height": "",
+        "label": "SKINNER HTTPS Status",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "SKINNER HTTPS Status",
+        "x": 1330,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "8d6c96fad1565c63",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug HTTPS SKINNER",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1330,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "0237a49df17ed99f",
+        "type": "ui_text",
+        "z": "840eee6fa338866e",
+        "group": "ca17497fede96a1e",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "HTTP Row Header",
+        "label": "HTTP",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1310,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "ed59d3af06adece4",
+        "type": "ui_text",
+        "z": "840eee6fa338866e",
+        "group": "ca17497fede96a1e",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "HTTPS Row Header",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1320,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "01efc509a399bb2e",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Get Time String",
+        "func": "// Get current time and format it as \"YYYY-MM-DD hh:mm\"\nconst now = new Date();\nconst year = now.getFullYear();\nconst month = String(now.getMonth() + 1).padStart(2, '0');\nconst day = String(now.getDate()).padStart(2, '0');\nconst hours = String(now.getHours()).padStart(2, '0');\nconst minutes = String(now.getMinutes()).padStart(2, '0');\n\nconst formattedTime = `${year}-${month}-${day} ${hours}:${minutes}`;\n\n// Set the formatted time to msg.payload for Node-RED output\nmsg.payload = formattedTime;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 900,
+        "wires": [
+            [
+                "757d1dc0f187c3e1"
+            ]
+        ]
+    },
+    {
+        "id": "757d1dc0f187c3e1",
+        "type": "ui_text",
+        "z": "840eee6fa338866e",
+        "group": "ca17497fede96a1e",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "Last Checked Timestamp",
+        "label": "Last Checked",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1330,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "9dae01b92586f32e",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug 4",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "bfdb5ddffca84303",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Configure Time",
+        "func": "// msg.payload has the current timestamp (Milliseconds since epoch)\n// Convert to ISO string format and adjust msg.payload\nconst timestamp = msg.payload; \nconst isoTime = new Date(msg.payload).toISOString();\n\n// Create a new message object or modify existing one\nconst newMsg = {\n    payload: {\n        timestamp: timestamp,\n        timestampS: isoTime\n    }\n};\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 660,
+        "wires": [
+            [
+                "3b3ee21e90779523",
+                "1014935432b0aade"
+            ]
+        ]
+    },
+    {
+        "id": "3b3ee21e90779523",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Setup KTBCS HTTP",
+        "func": "// input: msg.payload\n//   msg.payload.timestamp - current timestamp in milliseconds since epoch\n//   msg.payload.timestampS - current timestamp in ISO string format\n\nconst newMsg = msg || {};\n\nnewMsg.payload.url = 'http://ktbcs.xyz';\nnewMsg.payload.method = \"HTTP\";\nnewMsg.payload.expectStr = \"<title>KTBCS - Professional Technology Consulting</title>\";\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 720,
+        "wires": [
+            [
+                "9dae01b92586f32e"
+            ]
+        ]
+    },
+    {
+        "id": "1014935432b0aade",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Setup KTBCS HTTPS",
+        "func": "// input: msg.payload\n//   msg.payload.timestamp - current timestamp in milliseconds since epoch\n//   msg.payload.timestampS - current timestamp in ISO string format\n\nconst newMsg = msg || {};\n\nnewMsg.payload.url = 'https://ktbcs.xyz';\nnewMsg.payload.method = \"HTTPS\";\nnewMsg.payload.expectStr = \"<title>KTBCS - Professional Technology Consulting</title>\";\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 760,
+        "wires": [
+            [
+                "9dae01b92586f32e"
+            ]
+        ]
+    },
+    {
+        "id": "8e83acb5830038ed",
+        "type": "inject",
+        "z": "840eee6fa338866e",
+        "name": "Trigger Set inProcess ",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 60,
+        "wires": [
+            [
+                "424c89f6f5a9f69f"
+            ]
+        ]
+    },
+    {
+        "id": "21fa3d935caeeb47",
+        "type": "inject",
+        "z": "840eee6fa338866e",
+        "name": "Trigger Unset inProcess",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 120,
+        "wires": [
+            [
+                "d45e7c20964dce7d"
+            ]
+        ]
+    },
+    {
+        "id": "424c89f6f5a9f69f",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Set InProcess",
+        "func": "flow.set('svc_inProcess', true);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d45e7c20964dce7d",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "ReSet InProcess",
+        "func": "flow.set('svc_inProcess', false);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5d91cabd076cd407",
+        "type": "inject",
+        "z": "840eee6fa338866e",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 100,
+        "y": 180,
+        "wires": [
+            [
+                "faffcd16db44e145"
+            ]
+        ]
+    },
+    {
+        "id": "faffcd16db44e145",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Setup KTBCS HTTP",
+        "func": "// Store preserved values in a custom object\nconst tag = \"KTBCS_HTTP\"\nconst url = \"http://ktbcs.xyz\";\nconst method = \"GET\";\nconst expected_string = \"<title>KTBCS - Professional Technology Consulting</title>\";\n\nconst newMsg = {};\n\nnewMsg.tag = tag;\nnewMsg.url = url;\nnewMsg.method = method;\nnewMsg.expected_string = expected_string;\nnewMsg.timestamp = msg.payload;\n\nreturn newMsg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 180,
+        "wires": [
+            [
+                "9337426db1d16a1d",
+                "1e9ac16b6899c6aa"
+            ]
+        ]
+    },
+    {
+        "id": "ae4cdea72ff8e77d",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "Check Status Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "a0a746671ff4c12a",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Check And Set InProcess",
+        "func": "// Check inProcess flow variable and control flow execution\n// If inProcess is true: we are still processing previously triggered flow.\n//     exit the flow (return null)\n// If inProcess is false: set it to true and proceed\n\nconst inProcess = flow.get('svc_inProcess');\n\n// if already processing - exit the flow by returning null\nif (inProcess === true) {\n    node.warn(\"Flow already in process - exiting\");\n    flow.set('svc_aborted', true); \n    return null;\n}\n\n// Not processing - set inProcess flag to true and proceed\n// save time stamp for future flow reference\nflow.set('svc_aborted', false);\nflow.set('svc_inProcess', true);\nnode.log(\"Set svc_inProcess to true - proceeding with flow\");\n\nflow.set('svc_lastCheckTime', msg.payload); // trigger passes time stamp\nflow.set('svc_lastCheckTimeS', new Date(msg.payload).toLocaleString());\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 220,
+        "wires": [
+            [
+                "faffcd16db44e145"
+            ]
+        ]
+    },
+    {
+        "id": "9337426db1d16a1d",
+        "type": "subflow:2afd6555804d5217",
+        "z": "840eee6fa338866e",
+        "name": "Check Status",
+        "x": 820,
+        "y": 180,
+        "wires": [
+            [
+                "4a73763198e0aded",
+                "ae4cdea72ff8e77d"
+            ]
+        ]
+    },
+    {
+        "id": "4a73763198e0aded",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "ReSet InProcess",
+        "func": "flow.set('svc_inProcess', false);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 180,
+        "wires": [
+            [
+                "1f30652a33e87622"
+            ]
+        ]
+    },
+    {
+        "id": "1e9ac16b6899c6aa",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "Setup KTBCS HTTP Output",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "1f30652a33e87622",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Determine Output Path",
+        "func": "// Distribute status to appropriate dashboard output based on service tag\n\n// Validate presence of required properties\nif (!msg.persist?.tag) {\n    node.warn(\"Missing or invalid msg.persist.tag\");\n    return null;\n}\n\nif (!msg.persist?.match) {\n    node.warn(\"Missing or invalid msg.persist.match\");\n    return null;\n}\n\n// Extract tag and status, create output message \nconst tag = msg.persist.tag;\nconst matchStatus = msg.persist.match;\nconst outputMsg = { payload: matchStatus };\n\n// Route to correct output based on tag\nswitch (tag.toUpperCase()) {\n    case 'KTBCS_HTTP':\n        return [outputMsg, null, null, null, null]; \n    case 'KTBCS_HTTPS':\n        return [null, outputMsg, null, null, null]; \n    case 'SKINNER_HTTP':\n        return [null, null, outputMsg, null, null]; \n    case 'SKINNER_HTTPS':\n        return [null, null, null, outputMsg, null]; \n    case 'NAS_HTTP':\n        return [null, null, null, null, outputMsg]; \n    default:\n        node.warn(`Unknown tag: ${tag}`);\n        return null;\n}",
+        "outputs": 5,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 400,
+        "wires": [
+            [
+                "f0c8a2686f075ce6",
+                "25fc7c5e113349a4"
+            ],
+            [
+                "05745da8822e9549",
+                "c069c7f6c192017f"
+            ],
+            [
+                "46af3cda2d44c61d",
+                "c35503e3d7e86ee7"
+            ],
+            [
+                "8d6c96fad1565c63",
+                "2aa787343927f1b9"
+            ],
+            [
+                "4c23496360e22a9c",
+                "b3884213132ceead"
+            ]
+        ]
+    },
+    {
+        "id": "3f1a92d06018145b",
+        "type": "inject",
+        "z": "840eee6fa338866e",
+        "name": "Inject false",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "x": 880,
+        "y": 580,
+        "wires": [
+            [
+                "c069c7f6c192017f",
+                "c35503e3d7e86ee7",
+                "2aa787343927f1b9",
+                "b3884213132ceead",
+                "f0c8a2686f075ce6"
+            ]
+        ]
+    },
+    {
+        "id": "6b5c250edfe9724d",
+        "type": "ui_group",
+        "name": "KTBCS",
+        "tab": "2e7550ec53d741cf",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "0cbeca01ac5e0c11",
+        "type": "ui_group",
+        "name": "NAS",
+        "tab": "2e7550ec53d741cf",
+        "order": 4,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "1ddea1dfc6a0ebed",
+        "type": "ui_group",
+        "name": "SKINNER",
+        "tab": "2e7550ec53d741cf",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ca17497fede96a1e",
+        "type": "ui_group",
+        "name": "Row Label",
+        "tab": "2e7550ec53d741cf",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2e7550ec53d741cf",
+        "type": "ui_tab",
+        "name": "Service Status 2.0",
+        "icon": "dashboard",
+        "order": 7,
+        "disabled": false,
+        "hidden": false
+    }
+]

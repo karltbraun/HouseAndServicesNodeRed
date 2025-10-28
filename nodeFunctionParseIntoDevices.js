@@ -1,32 +1,49 @@
-// Add error checking
-if (!msg.payload || typeof msg.payload.device_name === 'undefined') {
-    node.error("Invalid message format", msg);
-    return null;
+// Extract device ID from topic (next to last element in path)
+const topicParts = msg.topic.split('/');
+const deviceId = topicParts[topicParts.length - 2]; // Next to last element
+
+const battery_ok = msg.payload
+let note = "No issues"
+
+// Function to get current local date/time in YYYY-MM-DD hh:mm format
+function getCurrentLocalDateTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
-let deviceName = msg.payload.device_name;
-let timestamp = msg.timestamp
-let batteryOk = msg.payload.battery_ok === 1 ? true : msg.payload.battery_ok === 0 ? false : null;
+// Optional error checking
+if (typeof deviceId === 'undefined') {
+    note = "Invalid topic format";
+    node.error(note, msg);
+}
 
-// output payload should be boolean
-// other message attributes defined for email output
-let newMsg = {
-    payload: batteryOk,
-    batteryOk: batteryOk,
-    deviceName: deviceName,
-    timestamp: timestamp
+if (typeof msg.payload !== 'number') {
+    note = "Invalid payload type";
+    node.error(note, msg);
+
+}
+
+// Create new payload object
+const newPayload = {
+    timestampS: getCurrentLocalDateTime(),
+    device_id: deviceId,
+    battery_ok: battery_ok,
+    note: note
 };
 
-switch (deviceName) {
-    case "Living_Room":
-        return [newMsg, null, null, null, null];
-    case "Patio":
-        return [null, newMsg, null, null, null];
-    case "Shrine_Room":
-        return [null, null, newMsg, null, null];
-    case "Porch":
-        return [null, null, null, newMsg, null];
-    default:
-        return [null, null, null, null, newMsg];
-}
+// Create new message with clean payload
+const newMsg = {
+    payload: newPayload,
+    // Optional: Carry through original properties
+    _msgid: msg._msgid,
+    topic: msg.topic
+};
 
+
+return newMsg;

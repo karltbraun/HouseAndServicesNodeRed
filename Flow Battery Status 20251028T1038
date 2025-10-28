@@ -1,0 +1,662 @@
+[
+    {
+        "id": "1ea66e6d203988a2",
+        "type": "tab",
+        "label": "Flow Battery Status",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a9509883a9be0ae9",
+        "type": "mqtt in",
+        "z": "1ea66e6d203988a2",
+        "name": "Vultr2 sensors raw battery",
+        "topic": "pi1/sensors/raw/+/battery_ok",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "40227b344b006862",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 230,
+        "y": 460,
+        "wires": [
+            [
+                "8dcf8b552ace98fd",
+                "1e7b5cc3b2c75eae"
+            ]
+        ]
+    },
+    {
+        "id": "8dcf8b552ace98fd",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "Parse Out Device ID",
+        "func": "// Extract device ID from topic (next to last element in path)\nconst topicParts = msg.topic.split('/');\nconst deviceId = topicParts[topicParts.length - 2]; // Next to last element\n\nconst battery_ok = msg.payload\nlet note = \"No issues\"\n\n// Function to get current local date/time in YYYY-MM-DD hh:mm format\nfunction getCurrentLocalDateTime() {\n    const now = new Date();\n    const year = now.getFullYear();\n    const month = String(now.getMonth() + 1).padStart(2, '0');\n    const day = String(now.getDate()).padStart(2, '0');\n    const hours = String(now.getHours()).padStart(2, '0');\n    const minutes = String(now.getMinutes()).padStart(2, '0');\n    \n    return `${year}-${month}-${day} ${hours}:${minutes}`;\n}\n\n// Optional error checking\nif (typeof deviceId === 'undefined') {\n    note = \"Invalid topic format\";\n    node.error(note, msg);\n}\n\nif (typeof msg.payload !== 'number') {\n    note = \"Invalid payload type\";\n    node.error(note, msg);\n\n}\n\n// Create new payload object\nconst newPayload = {\n    timestampS: getCurrentLocalDateTime(),\n    device_id: deviceId,\n    battery_ok: battery_ok,\n    note: note\n};\n\n// Create new message with clean payload\nconst newMsg = {\n    payload: newPayload,\n    // Optional: Carry through original properties\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\n\nreturn newMsg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 320,
+        "wires": [
+            [
+                "b196f56b42852b2c",
+                "db94772040f670f2"
+            ]
+        ]
+    },
+    {
+        "id": "b196f56b42852b2c",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Parsed Device_ID",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "db94772040f670f2",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "device_id to device_name",
+        "func": "// Device Name Lookup Function Node\nconst deviceLookup = {\n    \"37\": \"Living_Room\",\n    \"172\": \"Patio\",\n    \"164\": \"Porch\",\n    \"79\": \"Shrine_Room\",\n    \"999\": \"Test\"\n    // Add more mappings as needed\n};\n\n// Get device ID from incoming message\nconst deviceId = msg.payload.device_id;\nconst timestampS = msg.payload.timestampS;\nconst battery_ok = msg.payload.battery_ok;\n\n// Determine device name\nconst deviceName = deviceLookup[deviceId] || `UNKNOWN_${deviceId}`;\n\n// Create new payload\nconst newPayload = {\n    device_id: deviceId,\n    device_name: deviceName,\n    timestampS: timestampS,\n    battery_ok: battery_ok\n};\n\n// Optional: Add diagnostic info\nnewPayload.lookup_status = deviceLookup[deviceId] \n    ? \"Matched\" \n    : \"Fallback\";\n\n// Return enhanced message\nreturn {\n    payload: newPayload,\n    _msgid: msg._msgid,\n    topic: msg.topic\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 810,
+        "y": 400,
+        "wires": [
+            [
+                "d162b4fcb226e297",
+                "8f60cd5358ee5d7b",
+                "bb3adde2942e298a"
+            ]
+        ]
+    },
+    {
+        "id": "d162b4fcb226e297",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Mapped Device_Name",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "8f60cd5358ee5d7b",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "Parse_into_devices",
+        "func": "// Add error checking\nif (!msg.payload || typeof msg.payload.device_name === 'undefined') {\n    node.error(\"Invalid message format\", msg);\n    return null;\n}\n\nlet deviceName = msg.payload.device_name;\nlet timestampS = msg.payload.timestampS;\nlet batteryOk = msg.payload.battery_ok === 1 ? true : msg.payload.battery_ok === 0 ? false : null;\n\n// output payload should be boolean\n// other message attributes defined for email output\nlet newMsg = {\n    payload: batteryOk,\n    batteryOk: batteryOk,\n    deviceName: deviceName,\n    timestampS: timestampS\n};\n\nswitch (deviceName) {\n    case \"Living_Room\":\n        return [newMsg, null, null, null, null];\n    case \"Patio\":\n        return [null, newMsg, null, null, null];\n    case \"Shrine_Room\":\n        return [null, null, newMsg, null, null];\n    case \"Porch\":\n        return [null, null, null, newMsg, null];\n    default:\n        return [null, null, null, null, newMsg];\n}\n\n",
+        "outputs": 5,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1110,
+        "y": 400,
+        "wires": [
+            [
+                "529e8634a00f2cab",
+                "1a092f55f5d5d207",
+                "024255b861340b87",
+                "d9b0928d75a570eb"
+            ],
+            [
+                "ca4c6e04643a2dd4",
+                "739324b6124805f4",
+                "8b87a5e51e834ab0",
+                "8c6cb55211866722"
+            ],
+            [
+                "2a7071bd382a4648",
+                "6438502db157812f",
+                "ceab5b3075dfcb9d"
+            ],
+            [
+                "2c013d7ae1fcceba",
+                "3de688fdf1df5cae",
+                "c2fecbf6f8f053e6"
+            ],
+            [
+                "a7d2a18eef244c92"
+            ]
+        ]
+    },
+    {
+        "id": "529e8634a00f2cab",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Living_Room",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1430,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "ca4c6e04643a2dd4",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Patio",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1410,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "2a7071bd382a4648",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Shrine_Room",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1440,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "2c013d7ae1fcceba",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Porch",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1410,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "a7d2a18eef244c92",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Unknown",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1420,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "1a092f55f5d5d207",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 2,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Living Room Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Living Room LED",
+        "x": 1650,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "739324b6124805f4",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 3,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Patio Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Patio Battery",
+        "x": 1630,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "6438502db157812f",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 1,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Shrine Room Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Shrine Room Battery",
+        "x": 1660,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "3de688fdf1df5cae",
+        "type": "ui_led",
+        "z": "1ea66e6d203988a2",
+        "order": 4,
+        "group": "f704b1b3e654081a",
+        "width": 0,
+        "height": 0,
+        "label": "Porch Battery",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            },
+            {
+                "color": "#ffff00",
+                "value": "null",
+                "valueType": "num"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Porch Battery",
+        "x": 1640,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "1bb68fec61e2e3a9",
+        "type": "e-mail",
+        "z": "1ea66e6d203988a2",
+        "server": "smtp.gmail.com",
+        "port": "465",
+        "authtype": "BASIC",
+        "saslformat": true,
+        "token": "oauth2Response.access_token",
+        "secure": true,
+        "tls": true,
+        "name": "karltbraun@gmail.com",
+        "dname": "Email on bad battery",
+        "x": 1140,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "1e7b5cc3b2c75eae",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Raw Battery Output",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "364d11371878fb08",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "Alert on Bad Battery",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1140,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "2dc7fc0302194ab7",
+        "type": "inject",
+        "z": "1ea66e6d203988a2",
+        "name": "Inject Bad Battery Status",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "pi1/sensors/raw/999/battery_ok ",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 230,
+        "y": 400,
+        "wires": [
+            [
+                "1e7b5cc3b2c75eae",
+                "8dcf8b552ace98fd"
+            ]
+        ]
+    },
+    {
+        "id": "bb3adde2942e298a",
+        "type": "function",
+        "z": "1ea66e6d203988a2",
+        "name": "Determine Battery Status for Alerts",
+        "func": "// if device_name starts with UNKNOWN, return null\nif (msg.payload.device_name.startsWith(\"UNKNOWN\")) {\n    return null;\n}\n\n// if battery_ok is an integer == 1, battery is OK\n// we don't report it\nif (msg.payload.battery_ok === 1) {\n    return null;\n}\n\n// we have either a false (0) or some other value\nlet subject = msg.payload.device_name + \" Battery Status Not OK \" + msg.payload.battery_ok;\n\nlet line1 = \"Alert Generated At: \" + new Date().toLocaleString() + \"\\n\";\nlet line2 = \"Device: \" + msg.payload.device_name + \"\\n\";\nlet line3 = \"Battery Status: \" + msg.payload.battery_ok + \"\\n\";\n\nlet newMsg = {\n    \"topic\": subject,\n    \"payload\": line1 + line2 + line3\n}\nreturn newMsg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 560,
+        "wires": [
+            [
+                "364d11371878fb08",
+                "1bb68fec61e2e3a9"
+            ]
+        ]
+    },
+    {
+        "id": "024255b861340b87",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "ca7598637b19f38a",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Living Room Time Stamp",
+        "label": "",
+        "format": "{{msg.timestampS}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1670,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "d9b0928d75a570eb",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1620,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "8b87a5e51e834ab0",
+        "type": "debug",
+        "z": "1ea66e6d203988a2",
+        "name": "debug 6",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1620,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "8c6cb55211866722",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "ca7598637b19f38a",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Patio Time Stamp",
+        "label": "",
+        "format": "{{msg.timestampS}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1650,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ceab5b3075dfcb9d",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "ca7598637b19f38a",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "ShrineRoom Time Stamp",
+        "label": "",
+        "format": "{{msg.timestampS}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1670,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c2fecbf6f8f053e6",
+        "type": "ui_text",
+        "z": "1ea66e6d203988a2",
+        "group": "ca7598637b19f38a",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "Patio Time Stamp",
+        "label": "",
+        "format": "{{msg.timestampS}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 1650,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "40227b344b006862",
+        "type": "mqtt-broker",
+        "name": "n-vutlr2",
+        "broker": "n-vultr2",
+        "port": "1883",
+        "clientid": "ktbcs_mbp_node-red",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "f704b1b3e654081a",
+        "type": "ui_group",
+        "name": "House Sensors LED",
+        "tab": "c887baf6bfcb3bee",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ca7598637b19f38a",
+        "type": "ui_group",
+        "name": "Time Stamps",
+        "tab": "c887baf6bfcb3bee",
+        "order": 4,
+        "disp": true,
+        "width": "4",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c887baf6bfcb3bee",
+        "type": "ui_tab",
+        "name": "Battery Status",
+        "icon": "dashboard",
+        "order": 4,
+        "disabled": false,
+        "hidden": false
+    }
+]

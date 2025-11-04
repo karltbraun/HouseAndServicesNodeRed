@@ -1,0 +1,500 @@
+[
+    {
+        "id": "840eee6fa338866e",
+        "type": "tab",
+        "label": "Flow Service Status 2.0",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "644a35a48bc5ca4f",
+        "type": "mqtt in",
+        "z": "840eee6fa338866e",
+        "name": "vultr2 websites",
+        "topic": "KTBMES/+/websites/#",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "dd0c7c3266a0ffe8",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 440,
+        "wires": [
+            [
+                "9c2ff92227c0a009",
+                "7f97f001bb8db050"
+            ]
+        ]
+    },
+    {
+        "id": "7b9470a88a6f80c4",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug synology",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "55c19c0fd758be21",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "KTBCS HTTP Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "2cadcb145c4a76b5",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 4,
+        "group": "1ddea1dfc6a0ebed",
+        "width": "",
+        "height": "",
+        "label": "SKINNER HTTP",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "SKINNER HTTP Status",
+        "x": 1030,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "3b6908252ffd762d",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 4,
+        "group": "1ddea1dfc6a0ebed",
+        "width": "",
+        "height": "",
+        "label": "SKINNER HTTPS",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "SKINNER HTTPS Status",
+        "x": 1030,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "347baa5eb343b836",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "HTTP SKINNER Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "364448635edd2f3a",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "HTTPS KINNER Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1030,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "6864fafd9945338e",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "KTBCS HTTPS Status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "7f97f001bb8db050",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Change Message",
+        "func": "// Distribute status to appropriate dashboard output based on service tag\n// Extract tag and status, create output message \n\nif (!msg.topic || typeof msg.topic !== 'string') {\n    node.error(\"Invalid or missing topic\", msg);\n    return null;\n}\n\nconst topic = msg.topic.toLowerCase(); // Fixed typo\nconst topic_parts = topic.split('/');\n\nif (topic_parts.length < 3) {\n    node.error(\"Topic must have at least 3 segments\", msg);\n    return null;\n}\n\nlet tag = topic_parts[topic_parts.length - 1];\nlet method = topic_parts[topic_parts.length - 2];\nlet node_name = topic_parts[topic_parts.length - 3];\n\nlet outputMsg = {\n    payload: msg.payload,\n    tag: tag,\n    method: method,\n    node: node_name,\n    topic: msg.topic\n};\n\nreturn outputMsg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 440,
+        "wires": [
+            [
+                "6d3fe6d8d365735a",
+                "088eb9e4aceb7a96"
+            ]
+        ]
+    },
+    {
+        "id": "9c2ff92227c0a009",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 260,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "b8b2dcf20c33ce18",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "Timestamp",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 990,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "c118122af51e1f78",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug otherwise",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "6d3fe6d8d365735a",
+        "type": "debug",
+        "z": "840eee6fa338866e",
+        "name": "debug Change Message Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "088eb9e4aceb7a96",
+        "type": "function",
+        "z": "840eee6fa338866e",
+        "name": "Determine Output",
+        "func": "// Distribute status to appropriate dashboard output based on service tag\n\n// This is for a multi-output function node with 7 outputs:\n// Output 1: tag == 'last_published'\n// Output 2: node == 'ktbcs' and method == 'http' and tag == 'result'\n// Output 3: node == 'ktbcs' and method == 'https' and tag == 'result'\n// Output 4: node == 'skinner' and method == 'http' and tag == 'result'\n// Output 5: node == 'skinner' and method == 'https' and tag == 'result'\n// Output 6: node == 'nas' and method == 'http' and tag == 'result'\n// Output 7: reset (sends false when tag == 'reset')\n// Note: There is no https test for nas\n\nif (!msg.topic || typeof msg.topic !== 'string') {\n    node.error(\"Invalid or missing topic\", msg);\n    return null;\n}\n\nconst topic = msg.topic.toLowerCase();\nconst topic_parts = topic.split('/');\n\nif (topic_parts.length < 3) {\n    node.error(\"Topic must have at least 3 segments\", msg);\n    return null;\n}\n\nlet tag = topic_parts[topic_parts.length - 1];\nlet method = topic_parts[topic_parts.length - 2];\nlet node_name = topic_parts[topic_parts.length - 3];\n\nlet outputMsg = {\n    payload: msg.payload,\n    tag: tag,\n    method: method,\n    node: node_name\n};\n\n// Define output positions for clarity\nconst OUTPUT_LAST_PUBLISHED = 0;\nconst OUTPUT_KTBCS_HTTP = 1;\nconst OUTPUT_KTBCS_HTTPS = 2;\nconst OUTPUT_SKINNER_HTTP = 3;\nconst OUTPUT_SKINNER_HTTPS = 4;\nconst OUTPUT_NAS_HTTP = 5;\nconst OUTPUT_RESET = 6;\n\n// Initialize all outputs to null\nlet outputs = new Array(7).fill(null);\n\n// check for reset first\nif (tag === 'reset') {\n    // Send false to reset output\n    outputs[OUTPUT_RESET] = false;\n    return outputs;\n\n    // check for timestamp\n} else if (tag === 'last_published') {\n    // Send to output 1\n    outputs[OUTPUT_LAST_PUBLISHED] = outputMsg;\n    return outputs;\n\n    // if tag is not 'last_published' or 'reset', it better be 'result'\n} else if (tag !== 'result') {\n    // Invalid tag - not 'last_published', 'result', or 'reset'\n    node.error(`Invalid tag: ${tag}. Expected 'last_published', 'result', or 'reset'`, msg);\n    return null;\n\n    // tag is result - the output of checking if the web site is up and returns the right string\n    // we route to a different LED based on node and method\n} else {\n    if (node_name === 'ktbcs' && method === 'http') {\n        outputs[OUTPUT_KTBCS_HTTP] = outputMsg;\n    } else if (node_name === 'ktbcs' && method === 'https') {\n        outputs[OUTPUT_KTBCS_HTTPS] = outputMsg;\n    } else if (node_name === 'skinner' && method === 'http') {\n        outputs[OUTPUT_SKINNER_HTTP] = outputMsg;\n    } else if (node_name === 'skinner' && method === 'https') {\n        outputs[OUTPUT_SKINNER_HTTPS] = outputMsg;\n    } else if (node_name === 'nas' && method === 'http') {\n        outputs[OUTPUT_NAS_HTTP] = outputMsg;\n    } else {\n        // Unknown node/method combination for result\n        node.error(`Unknown node/method combination for result: ${node_name}/${method}`, msg);\n        return null;\n    }\n    return outputs;\n}",
+        "outputs": 7,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 590,
+        "y": 440,
+        "wires": [
+            [
+                "b8b2dcf20c33ce18",
+                "7a7ab2fb40de4f3f"
+            ],
+            [
+                "55c19c0fd758be21",
+                "3a7e0f7260e9be99"
+            ],
+            [
+                "6864fafd9945338e",
+                "93e013b967b859e4"
+            ],
+            [
+                "347baa5eb343b836",
+                "2cadcb145c4a76b5"
+            ],
+            [
+                "364448635edd2f3a",
+                "3b6908252ffd762d"
+            ],
+            [
+                "7b9470a88a6f80c4",
+                "f53a34c1e00167df"
+            ],
+            [
+                "c118122af51e1f78"
+            ]
+        ]
+    },
+    {
+        "id": "7a7ab2fb40de4f3f",
+        "type": "ui_text",
+        "z": "840eee6fa338866e",
+        "group": "ce5634c22cb14e37",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "TimeStamp",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 990,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "3a7e0f7260e9be99",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 4,
+        "group": "6b5c250edfe9724d",
+        "width": "",
+        "height": "",
+        "label": "KTBCS HTTP",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBCS HTTP Status",
+        "x": 1020,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "93e013b967b859e4",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 4,
+        "group": "6b5c250edfe9724d",
+        "width": "",
+        "height": "",
+        "label": "KTBCS HTTPS",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "KTBCS HTTPS Status",
+        "x": 1020,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "f53a34c1e00167df",
+        "type": "ui_led",
+        "z": "840eee6fa338866e",
+        "order": 4,
+        "group": "0cbeca01ac5e0c11",
+        "width": "",
+        "height": "",
+        "label": "NAS HTTPS",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "NAS HTTPS Status",
+        "x": 1010,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "dd0c7c3266a0ffe8",
+        "type": "mqtt-broker",
+        "name": "n-vultr2",
+        "broker": "n-vultr2",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "1ddea1dfc6a0ebed",
+        "type": "ui_group",
+        "name": "SKINNER",
+        "tab": "2e7550ec53d741cf",
+        "order": 4,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ce5634c22cb14e37",
+        "type": "ui_group",
+        "name": "Timestamp",
+        "tab": "2e7550ec53d741cf",
+        "order": 1,
+        "disp": true,
+        "width": "4",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "6b5c250edfe9724d",
+        "type": "ui_group",
+        "name": "KTBCS",
+        "tab": "2e7550ec53d741cf",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "0cbeca01ac5e0c11",
+        "type": "ui_group",
+        "name": "NAS",
+        "tab": "2e7550ec53d741cf",
+        "order": 5,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2e7550ec53d741cf",
+        "type": "ui_tab",
+        "name": "Service Status 2.0",
+        "icon": "dashboard",
+        "order": 7,
+        "disabled": false,
+        "hidden": false
+    }
+]

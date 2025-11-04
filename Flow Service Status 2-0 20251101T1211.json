@@ -1,0 +1,43 @@
+[
+    {
+        "id": "7a7ab2fb40de4f3f",
+        "type": "ui_text",
+        "z": "840eee6fa338866e",
+        "group": "ce5634c22cb14e37",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "TimeStamp",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 990,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "ce5634c22cb14e37",
+        "type": "ui_group",
+        "name": "Timestamp",
+        "tab": "2e7550ec53d741cf",
+        "order": 1,
+        "disp": true,
+        "width": "4",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2e7550ec53d741cf",
+        "type": "ui_tab",
+        "name": "Service Status 2.0",
+        "icon": "dashboard",
+        "order": 7,
+        "disabled": false,
+        "hidden": false
+    }
+]
